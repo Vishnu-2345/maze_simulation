@@ -1,0 +1,418 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <world name="maze_world">
+    <!-- Physics configuration -->
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <!-- Essential Gazebo Harmonic system plugins -->
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin
+      filename="gz-sim-sensors-system"
+      name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <!-- Scene Lighting & Ambient -->
+    <scene>
+      <ambient>0.6 0.6 0.6 1.0</ambient>
+      <background>0.8 0.88 0.95 1.0</background>
+      <shadows>true</shadows>
+      <grid>false</grid>
+    </scene>
+
+    <!-- Directional Sun Light -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 15 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <direction>-0.5 0.3 -0.9</direction>
+    </light>
+
+    <!-- Secondary fill light -->
+    <light type="directional" name="fill_light">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.4 0.4 0.45 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>0.5 -0.3 -0.8</direction>
+    </light>
+
+    <!-- Ground Plane -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>30 30</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>30 30</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.22 0.24 0.27 1.0</ambient>
+            <diffuse>0.35 0.38 0.42 1.0</diffuse>
+            <specular>0.1 0.1 0.1 1.0</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Start Marker (Green disc on ground) -->
+    <model name="start_marker">
+      <static>true</static>
+      <pose>-4.5 -4.5 0.005 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.45</radius>
+              <length>0.01</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.1 0.7 0.2 1.0</ambient>
+            <diffuse>0.15 0.85 0.25 1.0</diffuse>
+            <emissive>0.05 0.3 0.1 1.0</emissive>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Goal / Exit Marker (Gold disc on ground) -->
+    <model name="goal_marker">
+      <static>true</static>
+      <pose>4.5 4.5 0.005 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.45</radius>
+              <length>0.01</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.85 0.65 0.1 1.0</ambient>
+            <diffuse>0.95 0.75 0.15 1.0</diffuse>
+            <emissive>0.3 0.25 0.05 1.0</emissive>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Maze Structure Model -->
+    <model name="maze">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="walls">
+
+        <!-- Outer Boundary Walls (12m x 12m, wall height 1.0m, wall thickness 0.15m) -->
+        <!-- North Wall -->
+        <collision name="wall_north_col">
+          <pose>0 6.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>12.15 0.15 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_north_vis">
+          <pose>0 6.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>12.15 0.15 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.15 0.35 0.55 1.0</ambient>
+            <diffuse>0.22 0.48 0.72 1.0</diffuse>
+            <specular>0.2 0.2 0.2 1.0</specular>
+          </material>
+        </visual>
+
+        <!-- South Wall -->
+        <collision name="wall_south_col">
+          <pose>0 -6.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>12.15 0.15 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_south_vis">
+          <pose>0 -6.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>12.15 0.15 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.15 0.35 0.55 1.0</ambient>
+            <diffuse>0.22 0.48 0.72 1.0</diffuse>
+            <specular>0.2 0.2 0.2 1.0</specular>
+          </material>
+        </visual>
+
+        <!-- West Wall -->
+        <collision name="wall_west_col">
+          <pose>-6.0 0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 12.15 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_west_vis">
+          <pose>-6.0 0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 12.15 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.15 0.35 0.55 1.0</ambient>
+            <diffuse>0.22 0.48 0.72 1.0</diffuse>
+            <specular>0.2 0.2 0.2 1.0</specular>
+          </material>
+        </visual>
+
+        <!-- East Wall -->
+        <collision name="wall_east_col">
+          <pose>6.0 0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 12.15 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_east_vis">
+          <pose>6.0 0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 12.15 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.15 0.35 0.55 1.0</ambient>
+            <diffuse>0.22 0.48 0.72 1.0</diffuse>
+            <specular>0.2 0.2 0.2 1.0</specular>
+          </material>
+        </visual>
+
+        <!-- Internal Walls creating labyrinth corridors -->
+        <!-- Wall I1: Horizontal divider south-west -->
+        <collision name="wall_i1_col">
+          <pose>-3.5 -3.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>5.0 0.15 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i1_vis">
+          <pose>-3.5 -3.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>5.0 0.15 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+        <!-- Wall I2: Vertical divider south-central -->
+        <collision name="wall_i2_col">
+          <pose>-1.0 -4.5 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 3.0 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i2_vis">
+          <pose>-1.0 -4.5 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 3.0 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+        <!-- Wall I3: Horizontal segment south-east -->
+        <collision name="wall_i3_col">
+          <pose>2.5 -4.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>4.0 0.15 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i3_vis">
+          <pose>2.5 -4.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>4.0 0.15 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+        <!-- Wall I4: Vertical wall east dead-end pocket -->
+        <collision name="wall_i4_col">
+          <pose>4.5 -2.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 4.0 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i4_vis">
+          <pose>4.5 -2.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 4.0 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+        <!-- Wall I5: Central horizontal divider -->
+        <collision name="wall_i5_col">
+          <pose>0.5 -1.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>5.0 0.15 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i5_vis">
+          <pose>0.5 -1.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>5.0 0.15 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+        <!-- Wall I6: West vertical spine -->
+        <collision name="wall_i6_col">
+          <pose>-3.5 0.5 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 5.0 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i6_vis">
+          <pose>-3.5 0.5 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 5.0 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+        <!-- Wall I7: Mid-left horizontal -->
+        <collision name="wall_i7_col">
+          <pose>-1.5 1.5 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>4.0 0.15 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i7_vis">
+          <pose>-1.5 1.5 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>4.0 0.15 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+        <!-- Wall I8: Center vertical wall -->
+        <collision name="wall_i8_col">
+          <pose>0.5 2.5 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 2.0 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i8_vis">
+          <pose>0.5 2.5 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 2.0 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+        <!-- Wall I9: North-west horizontal divider -->
+        <collision name="wall_i9_col">
+          <pose>-2.0 4.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>5.0 0.15 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i9_vis">
+          <pose>-2.0 4.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>5.0 0.15 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+        <!-- Wall I10: North-east vertical baffle -->
+        <collision name="wall_i10_col">
+          <pose>2.5 2.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 4.0 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i10_vis">
+          <pose>2.5 2.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>0.15 4.0 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+        <!-- Wall I11: Goal approach barrier -->
+        <collision name="wall_i11_col">
+          <pose>4.5 3.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>3.0 0.15 1.0</size></box>
+          </geometry>
+        </collision>
+        <visual name="wall_i11_vis">
+          <pose>4.5 3.0 0.5 0 0 0</pose>
+          <geometry>
+            <box><size>3.0 0.15 1.0</size></box>
+          </geometry>
+          <material>
+            <ambient>0.25 0.45 0.65 1.0</ambient>
+            <diffuse>0.35 0.6 0.85 1.0</diffuse>
+          </material>
+        </visual>
+
+      </link>
+    </model>
+  </world>
+</sdf>
