@@ -42,3 +42,4 @@ def generate_launch_description():
         sim_launch,
         wall_follower_node
     ])
+

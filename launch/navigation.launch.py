@@ -82,3 +82,4 @@ def generate_launch_description():
         nav2_launch,
         rviz_node
     ])
+

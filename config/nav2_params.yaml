@@ -242,3 +242,4 @@ lifecycle_manager:
                  'behavior_server',
                  'bt_navigator',
                  'waypoint_follower']
+

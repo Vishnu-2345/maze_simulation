@@ -1,9 +1,8 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, TimerAction
 from launch.conditions import IfCondition
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, Command, FindExecutable
 from launch_ros.actions import Node
 from launch_ros.descriptions import ParameterValue
@@ -23,9 +22,7 @@ def generate_launch_description():
         default_bridge_cfg = os.path.join(base_dir, 'config', 'ros_gz_bridge.yaml')
         default_rviz_cfg = os.path.join(base_dir, 'rviz', 'robot_view.rviz')
 
-    gz_sim_share = get_package_share_directory('ros_gz_sim')
-
-    # Launch Arguments
+    # Launch Configurations
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     world = LaunchConfiguration('world', default=default_world)
     x_pose = LaunchConfiguration('x_pose', default='-4.5')
@@ -46,15 +43,13 @@ def generate_launch_description():
     declare_yaw = DeclareLaunchArgument('yaw', default_value='0.0', description='Spawn Yaw orientation')
     declare_rviz = DeclareLaunchArgument('rviz', default_value='true', description='Open RViz2')
 
-    # Gazebo Sim Launch
-    gz_sim = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(gz_sim_share, 'launch', 'gz_sim.launch.py')
-        ),
-        launch_arguments={'gz_args': ['-r ', world]}.items()
+    # Start Gazebo Sim directly with unpaused flag (-r)
+    gz_sim = ExecuteProcess(
+        cmd=['gz', 'sim', '-r', world],
+        output='screen'
     )
 
-    # Robot State Publisher (Processes Xacro -> Robot Description & TF)
+    # Robot State Publisher (Processes Xacro -> Robot Description & Static TF)
     robot_description_content = Command([
         FindExecutable(name='xacro'), ' ', default_urdf
     ])
@@ -81,19 +76,25 @@ def generate_launch_description():
         }]
     )
 
-    # Spawn Robot into Gazebo Harmonic
+    # Spawn Robot into Gazebo Harmonic via raw string (eliminating topic wait race conditions)
     spawn_robot = Node(
         package='ros_gz_sim',
         executable='create',
         output='screen',
         arguments=[
             '-name', 'maze_bot',
-            '-topic', 'robot_description',
+            '-string', robot_description_content,
             '-x', x_pose,
             '-y', y_pose,
             '-z', z_pose,
             '-Y', yaw_pose
         ]
+    )
+
+    # Delay spawner by 2.0s to ensure Gazebo world physics & plugins are initialized
+    delayed_spawn_robot = TimerAction(
+        period=2.0,
+        actions=[spawn_robot]
     )
 
     # RViz2 Node
@@ -118,6 +119,6 @@ def generate_launch_description():
         gz_sim,
         robot_state_publisher,
         bridge,
-        spawn_robot,
+        delayed_spawn_robot,
         rviz_node
     ])

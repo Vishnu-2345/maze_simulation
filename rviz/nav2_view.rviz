@@ -1,6 +1,6 @@
 Panels:
   - Class: rviz_common/Displays
-    Help Height: 78
+    Help Height: 50
     Name: Displays
     Property Tree Widget:
       Expanded:
@@ -11,8 +11,8 @@ Panels:
         - /Global Costmap1
         - /Local Costmap1
         - /Global Plan1
-      Splitter Ratio: 0.5
-    Tree Height: 557
+      Splitter Ratio: 0.6
+    Tree Height: 240
 Visualization Manager:
   Class: ""
   Displays:
@@ -62,7 +62,7 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (m): 0.05
+      Size (m): 0.06
       Style: Flat Squares
       Topic:
         Depth: 5
@@ -181,7 +181,7 @@ Visualization Manager:
       Value: false
   Enabled: true
   Global Options:
-    Background Color: 48; 48; 48
+    Background Color: 40; 40; 44
     Fixed Frame: map
     Frame Rate: 30
   Name: root
@@ -219,5 +219,5 @@ Visualization Manager:
       Pitch: 1.15
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.78
+      Yaw: 0.785
     Saved: ~

@@ -65,3 +65,4 @@ def generate_launch_description():
         slam_node,
         rviz_node
     ])
+
