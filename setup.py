@@ -29,7 +29,7 @@ setup(
         'console_scripts': [
             'wall_follower = maze_simulation.wall_follower:main',
             'maze_navigator = maze_simulation.maze_navigator:main',
+            'teleop_keyboard = maze_simulation.teleop_keyboard:main',
         ],
     },
 )
-
